@@ -16,39 +16,57 @@ so this workflow is going to change.
 
 ## `init` a directory
 
-`stmocli init` creates an empty `.stmocli.conf` file in the current directory.
+`stmocli init`
+
+Creates an empty `.stmocli.conf` file in the current directory.
 
 ## `track` an existing query
 
 `stmocli track <redash_id> <filename>`
-downloads the sql
 
-`.stmocli.conf` contains a dictionary of configuration files
-St. Mocli's atomic unit is a query.
-`.stmocli.conf` contains a dictionary of lists
+This command downloads the SQL statements associated with the given redash_id
+and saves it in a file with the given name.
+The necessary metadata is then added to the config file.
+
+For example, calling
+`stmocli track 49741 poc.sql`
+would create a file in the current directory called `poc.sql`,
+with the following content:
+
+```sql
+SELECT
+    normalized_channel
+FROM longitudinal
+LIMIT 10
+```
+
+Assuming this is the first query being tracked, `.stmocli.conf` would look like this:
 
 ```json
 {
-  "poc_query": {
+  "poc": {
     "redash_id": 49741,
-    "query_title": "St. Mocli POC",
-    "query_filename": "poc.sql"
+    "title": "St. Mocli POC",
+    "filename": "poc.sql"
   }
 }
 ```
 
-
-## `start` a new query
-
-
-
 ## `pull` a linked query
 
+`stmocli pull [<id>]`
 
+Pulls the current SQL statements and metadata from re:dash for the given query.
+If no query id is specified, pull data for all queries.
+This will **overwrite local data**.
+Be sure to use version control.
 
 ## `push` a query
 
+`stmocli push [<id>]`
 
+Pushes the current SQL statements and metadata to re:dash for the given query.
+If no query id is specified, push data for all queries.
 
 # Roadmap
 
@@ -65,4 +83,11 @@ Maybe we add a git-hook that pushes master on commit. Seamless.
 Users will need to upload queries to a temporary re:dash query to preview the results.
 This should be easy to do with a `preview` command.
 It may also be useful to execute queries against presto directly.
+
+## `start` a new query
+
+Currently, St. Mocli can only track existing queries.
+We should add a `start` command that will make it easy to start queries from the cli.
+
+
 
