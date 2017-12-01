@@ -61,6 +61,8 @@ If no query id is specified, pull data for all queries.
 This will **overwrite local data**.
 Be sure to use version control.
 
+`<id>` must be a key in the dictionary stored in `.stmocli.conf`
+
 ## `push` a query
 
 `stmocli push [<id>]`
@@ -68,7 +70,11 @@ Be sure to use version control.
 Pushes the current SQL statements and metadata to re:dash for the given query.
 If no query id is specified, push data for all queries.
 
+`<id>` must be a key in the dictionary stored in `.stmocli.conf`
+
 # Roadmap
+
+## Push-only and Automatic deploys
 
 This tool assumes no edits happen in re:dash, which is a bad assumption.
 Edits made in re:dash get overwritten if you `push` without `pull`ing first.
@@ -80,6 +86,8 @@ We could then remove the `pull` command, and this tool becomes `push`-only.
 From there we can have a scheduled job (hourly?) that pushes master to STMO.
 Maybe we add a git-hook that pushes master on commit. Seamless.
 
+## `preview` a query
+
 Users will need to upload queries to a temporary re:dash query to preview the results.
 This should be easy to do with a `preview` command.
 It may also be useful to execute queries against presto directly.
@@ -88,6 +96,3 @@ It may also be useful to execute queries against presto directly.
 
 Currently, St. Mocli can only track existing queries.
 We should add a `start` command that will make it easy to start queries from the cli.
-
-
-
