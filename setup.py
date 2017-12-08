@@ -22,6 +22,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "redash-client",
+        "click",
     ],
     tests_require=test_deps,
     extras_require=extras,
