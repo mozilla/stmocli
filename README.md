@@ -16,11 +16,15 @@ so this workflow is going to change.
 
 ## `init` a directory
 
+**Implemented**
+
 `stmocli init`
 
 Creates an empty `.stmocli.conf` file in the current directory.
 
 ## `track` an existing query
+
+**Not Yet Implemented**
 
 `stmocli track <redash_id> <filename>`
 
@@ -54,6 +58,8 @@ Assuming this is the first query being tracked, `.stmocli.conf` would look like 
 
 ## `pull` a linked query
 
+**Not Yet Implemented**
+
 `stmocli pull [<id>]`
 
 Pulls the current SQL statements and metadata from re:dash for the given query.
@@ -64,6 +70,8 @@ Be sure to use version control.
 `<id>` must be a key in the dictionary stored in `.stmocli.conf`
 
 ## `push` a query
+
+**Not Yet Implemented**
 
 `stmocli push [<id>]`
 
