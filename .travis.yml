@@ -1,0 +1,11 @@
+language: python
+cache: pip
+addons:
+  apt:
+    packages:
+install:
+  - pip install tox-travis codecov
+script:
+  - tox
+after_success:
+- codecov
