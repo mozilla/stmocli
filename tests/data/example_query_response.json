@@ -1,0 +1,66 @@
+{
+    "api_key": "TOTALLYFAKEQUERYAPIKEY",
+    "can_edit": true,
+    "created_at": "2017-12-01T17:59:50.060454+00:00",
+    "data_source_id": 1,
+    "description": null,
+    "id": 49741,
+    "is_archived": false,
+    "is_draft": false,
+    "last_modified_by": {
+        "auth_type": "external",
+        "created_at": "2016-07-12T18:26:13.736634+00:00",
+        "email": "rharter@mozilla.com",
+        "gravatar_url": "https://www.gravatar.com/avatar/8259d4073ed8ba5f61f5d60c978b0e69?s=40",
+        "groups": [
+            2,
+            4,
+            1
+        ],
+        "id": 276,
+        "last_active_at": [
+            "2017-12-12T21:27:13+00:00"
+        ],
+        "name": "Ryan Harter",
+        "updated_at": "2017-08-31T18:34:53.964941+00:00"
+    },
+    "latest_query_data_id": 3046533,
+    "name": "St. Mocli POC",
+    "options": {
+        "parameters": []
+    },
+    "query": "SELECT\n    normalized_channel\nFROM longitudinal\nLIMIT 10",
+    "query_hash": "af24c135608b8bd58ab58c70391d3633",
+    "schedule": null,
+    "schedule_until": null,
+    "updated_at": "2017-12-01T18:00:00.655424+00:00",
+    "user": {
+        "auth_type": "external",
+        "created_at": "2016-07-12T18:26:13.736634+00:00",
+        "email": "rharter@mozilla.com",
+        "gravatar_url": "https://www.gravatar.com/avatar/8259d4073ed8ba5f61f5d60c978b0e69?s=40",
+        "groups": [
+            2,
+            4,
+            1
+        ],
+        "id": 276,
+        "last_active_at": [
+            "2017-12-12T21:27:13+00:00"
+        ],
+        "name": "Ryan Harter",
+        "updated_at": "2017-08-31T18:34:53.964941+00:00"
+    },
+    "version": 3,
+    "visualizations": [
+        {
+            "created_at": "2017-12-01T17:59:50.060454+00:00",
+            "description": "",
+            "id": 133836,
+            "name": "Table",
+            "options": {},
+            "type": "TABLE",
+            "updated_at": "2017-12-01T17:59:50.060454+00:00"
+        }
+    ]
+}
