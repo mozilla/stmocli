@@ -1,11 +1,13 @@
 import traceback
 import pytest
 import click
+import json
 import os
 from httmock import all_requests, HTTMock
 from redash_client.client import RedashClient
 from click.testing import CliRunner
 from stmocli import cli
+from stmocli.conf import default_path as conf_path
 
 
 with open('tests/data/example_query_response.json', 'rt') as infile:
@@ -24,27 +26,39 @@ def runner():
 
 def test_init(runner):
     with runner.isolated_filesystem():
-        runner.invoke(cli.init)
+        result = runner.invoke(cli.init)
 
-        assert os.path.isfile('.stmocli.conf')
+        print_debug_for_runner(result)
+
+        assert os.path.isfile(conf_path)
 
 def test_track(runner):
     query_id = '49741'
-    filename = 'poc.sql'
+    query_name = 'poc'
+    filename = query_name + '.sql'
 
     with runner.isolated_filesystem():
         with HTTMock(response_content):
             result = runner.invoke(cli.track, [
                 query_id,
-                filename,
+                query_name,
                 '--redash_api_key',
                 'TOTALLY_FAKE_KEY'
             ])
 
+        print_debug_for_runner(result)
 
+        # Verify we save the query to the right file
         assert os.path.isfile(filename)
         with open(filename, 'r') as query:
             assert "SELECT" in query.read()
+
+        # Verify we save the query_id to the config file
+        assert os.path.isfile(conf_path)
+        with open(conf_path, 'r') as conf_file:
+            config = json.loads(conf_file.read())
+            assert query_name in config
+            assert config[query_name]['redash_id'] == query_id
 
 
 def print_debug_for_runner(result):
