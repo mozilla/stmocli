@@ -8,10 +8,10 @@ class Conf(object):
         self.path = os.path.abspath(path)
 
         if not os.path.isfile(self.path):
-            self.init_file()
-
-        with open(path, 'r') as conf_file:
-            self.contents = json.loads(conf_file.read())
+            self.contents = {}
+        else:
+            with open(path, 'r') as conf_file:
+                self.contents = json.loads(conf_file.read())
 
     def init_file(self):
         with open(self.path, 'a') as conf_file:

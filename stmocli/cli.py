@@ -17,7 +17,7 @@ def cli():
 @cli.command()
 @pass_conf
 def init(conf):
-    conf.save()
+    conf.init_file()
 
 
 @cli.command()
