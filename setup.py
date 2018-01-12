@@ -5,6 +5,7 @@ test_deps = [
     'coverage',
     'pytest-cov',
     'pytest',
+    'httmock',
 ]
 
 extras = {

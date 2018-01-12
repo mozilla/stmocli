@@ -16,7 +16,7 @@ so this workflow is going to change.
 
 ## `init` a directory
 
-**Implemented**
+**Implemented**!
 
 `stmocli init`
 
@@ -24,7 +24,7 @@ Creates an empty `.stmocli.conf` file in the current directory.
 
 ## `track` an existing query
 
-**Not Yet Implemented**
+**Implemented**!
 
 `stmocli track <redash_id> <filename>`
 
@@ -50,7 +50,6 @@ Assuming this is the first query being tracked, `.stmocli.conf` would look like 
 {
   "poc": {
     "redash_id": 49741,
-    "title": "St. Mocli POC",
     "filename": "poc.sql"
   }
 }
