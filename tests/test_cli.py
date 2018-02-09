@@ -34,14 +34,13 @@ def test_init(runner):
 
 def test_track(runner):
     query_id = '49741'
-    query_name = 'poc'
-    filename = query_name + '.sql'
+    file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
         with HTTMock(response_content):
             result = runner.invoke(cli.track, [
                 query_id,
-                query_name,
+                file_name,
                 '--redash_api_key',
                 'TOTALLY_FAKE_KEY'
             ])
@@ -49,17 +48,16 @@ def test_track(runner):
         print_debug_for_runner(result)
 
         # Verify we save the query to the right file
-        assert os.path.isfile(filename)
-        with open(filename, 'r') as query:
+        assert os.path.isfile(file_name)
+        with open(file_name, 'r') as query:
             assert "SELECT" in query.read()
 
         # Verify we save the query_id to the config file
         assert os.path.isfile(conf_path)
         with open(conf_path, 'r') as conf_file:
             config = json.loads(conf_file.read())
-            assert query_name in config
-            assert config[query_name]['redash_id'] == query_id
-
+            assert file_name in config
+            assert config[file_name]['query_id'] == query_id
 
 def print_debug_for_runner(result):
     """Helper function for printing click.runner debug tracebacks."""

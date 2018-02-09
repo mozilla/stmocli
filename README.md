@@ -48,9 +48,13 @@ Assuming this is the first query being tracked, `.stmocli.conf` would look like 
 
 ```json
 {
-  "poc": {
-    "redash_id": 49741,
-    "filename": "poc.sql"
+  "poc.sql": {
+    "query_id": 49741,
+    "data_source_id": <data source>,
+    "name": <query name>,
+    "description": <query description>,
+    "schedule": <schedule interval in seconds>,
+    "options": <query options>
   }
 }
 ```
@@ -70,14 +74,14 @@ Be sure to use version control.
 
 ## `push` a query
 
-**Not Yet Implemented**
+**Implemented!**
 
-`stmocli push [<id>]`
+`stmocli push [<filename>]`
 
-Pushes the current SQL statements and metadata to re:dash for the given query.
-If no query id is specified, push data for all queries.
+Pushes the current SQL statements and metadata to re:dash for the given query file.
+If no filename is specified, push data for all queries.
 
-`<id>` must be a key in the dictionary stored in `.stmocli.conf`
+`<filename>` must be a key in the dictionary stored in `.stmocli.conf`
 
 # Roadmap
 
