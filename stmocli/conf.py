@@ -22,12 +22,12 @@ class Conf(object):
         with open(self.path, 'w') as conf_file:
             conf_file.write(json.dumps(self.contents))
 
-    def add_query(self, name, redash_id, filename):
-        if name in self.contents:
-            print('Query, "{}" already tracked!'.format(name))
+    def add_query(self, file_name, query_metadata):
+        if file_name in self.contents:
+            print('Query, "{}" already tracked!'.format(file_name))
         else:
-            self.contents[name] = {
-                'redash_id': redash_id,
-                'filename': filename,
-            }
+            self.contents[file_name] = query_metadata
             self.save()
+
+    def get_query(self, file_name):
+        return self.contents[file_name].copy()
