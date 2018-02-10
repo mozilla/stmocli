@@ -2,6 +2,7 @@ import traceback
 import pytest
 import click
 import json
+import md5
 import os
 from httmock import all_requests, HTTMock
 from redash_client.client import RedashClient
@@ -19,6 +20,16 @@ def response_content(url, request):
         'status_code': 200,
         'content': example_response,
     }
+
+@all_requests
+def push_response(url, request):
+    return {'status_code': 200,
+            'content': '{}'}
+
+@all_requests
+def push_response_fail(url, request):
+    return {'status_code': 500,
+            'content': '{}'}
 
 @pytest.fixture
 def runner():
@@ -57,7 +68,83 @@ def test_track(runner):
         with open(conf_path, 'r') as conf_file:
             config = json.loads(conf_file.read())
             assert file_name in config
-            assert config[file_name]['query_id'] == query_id
+            assert config[file_name]['id'] == query_id
+
+def test_push_tracked(runner):
+    query_id = '49741'
+    file_name = 'poc.sql'
+
+    with runner.isolated_filesystem():
+        with HTTMock(response_content):
+            result = runner.invoke(cli.track, [
+                query_id,
+                file_name
+            ])
+
+        # Read the saved query
+        assert os.path.isfile(file_name)
+        with open(file_name, 'r') as fin:
+            query_before = fin.read()
+
+        query_after = query_before + "--appended"
+        # Overwrite with a new query
+        with open(file_name, 'w') as fout:
+            fout.write(query_after)
+
+        # Now push the result
+        with HTTMock(push_response):
+            push_result = runner.invoke(cli.push, [
+                file_name
+            ])
+
+        m = md5.new()
+        m.update(query_after)
+        expected_output = "Query ID {} updated with content from {} (md5 {})".format(
+            query_id, file_name, m.hexdigest())
+        assert push_result.output.strip() == expected_output
+
+def test_push_fail(runner):
+    query_id = '49741'
+    file_name = 'poc.sql'
+
+    with runner.isolated_filesystem():
+        with HTTMock(response_content):
+            result = runner.invoke(cli.track, [
+                query_id,
+                file_name
+            ])
+
+        # Read the saved query
+        assert os.path.isfile(file_name)
+        with open(file_name, 'r') as fin:
+            query_before = fin.read()
+
+        query_after = query_before + "--appended"
+        # Overwrite with a new query
+        with open(file_name, 'w') as fout:
+            fout.write(query_after)
+
+        # Now push the result, expecting a failure
+        with HTTMock(push_response_fail):
+            push_result = runner.invoke(cli.push, [
+                file_name
+            ])
+
+        expected_output = "Failed to update query from {}:".format(file_name)
+        assert push_result.output.startswith(expected_output)
+        assert "500" in push_result.output
+
+def test_push_untracked(runner):
+    file_name = 'missing.sql'
+
+    # Try to push a nonexistent query
+    with HTTMock(push_response):
+        push_result = runner.invoke(cli.push, [
+            file_name
+        ])
+
+    assert "No such query" in push_result.output
+
 
 def print_debug_for_runner(result):
     """Helper function for printing click.runner debug tracebacks."""
