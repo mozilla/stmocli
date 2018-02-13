@@ -76,10 +76,9 @@ Be sure to use version control.
 
 **Implemented!**
 
-`stmocli push [<filename>]`
+`stmocli push <filename>`
 
 Pushes the current SQL statements and metadata to re:dash for the given query file.
-If no filename is specified, push data for all queries.
 
 `<filename>` must be a key in the dictionary stored in `.stmocli.conf`
 
