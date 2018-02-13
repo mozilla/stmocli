@@ -70,26 +70,34 @@ def test_track(runner):
             assert file_name in config
             assert config[file_name]['id'] == query_id
 
+def setup_tracked_query(runner, query_id, file_name):
+    with HTTMock(response_content):
+        result = runner.invoke(cli.track, [
+            query_id,
+            file_name
+        ])
+
+    # Read the saved query
+    assert os.path.isfile(file_name)
+    with open(file_name, 'r') as fin:
+        query_contents = fin.read()
+    return query_contents
+
+def update_tracked_query(file_name, original_query):
+    updated_query = original_query + "--appended"
+    with open(file_name, 'w') as fout:
+        fout.write(updated_query)
+    return updated_query
+
 def test_push_tracked(runner):
     query_id = '49741'
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        with HTTMock(response_content):
-            result = runner.invoke(cli.track, [
-                query_id,
-                file_name
-            ])
-
-        # Read the saved query
-        assert os.path.isfile(file_name)
-        with open(file_name, 'r') as fin:
-            query_before = fin.read()
-
-        query_after = query_before + "--appended"
-        # Overwrite with a new query
-        with open(file_name, 'w') as fout:
-            fout.write(query_after)
+        # Track the example query
+        query_before = setup_tracked_query(runner, query_id, file_name)
+        # Overwrite with a new query string
+        query_after = update_tracked_query(file_name, query_before)
 
         # Now push the result
         with HTTMock(push_response):
@@ -108,21 +116,8 @@ def test_push_fail(runner):
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        with HTTMock(response_content):
-            result = runner.invoke(cli.track, [
-                query_id,
-                file_name
-            ])
-
-        # Read the saved query
-        assert os.path.isfile(file_name)
-        with open(file_name, 'r') as fin:
-            query_before = fin.read()
-
-        query_after = query_before + "--appended"
-        # Overwrite with a new query
-        with open(file_name, 'w') as fout:
-            fout.write(query_after)
+        query_before = setup_tracked_query(runner, query_id, file_name)
+        query_after = update_tracked_query(file_name, query_before)
 
         # Now push the result, expecting a failure
         with HTTMock(push_response_fail):
