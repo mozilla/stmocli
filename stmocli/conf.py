@@ -19,7 +19,8 @@ class Conf(object):
 
     def save(self):
         with open(self.path, 'w') as conf_file:
-            conf_file.write(json.dumps(self.contents))
+            conf_file.write(json.dumps(self.contents, sort_keys=True,
+                                       indent=2, separators=(',', ': ')))
 
     def add_query(self, file_name, query_metadata):
         if file_name in self.contents:
