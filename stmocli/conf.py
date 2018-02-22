@@ -18,7 +18,6 @@ class Conf(object):
             conf_file.write(json.dumps({}))
 
     def save(self):
-        print(self.path)
         with open(self.path, 'w') as conf_file:
             conf_file.write(json.dumps(self.contents))
 
