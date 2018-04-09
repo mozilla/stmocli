@@ -1,12 +1,14 @@
-import traceback
 import hashlib
-import pytest
-import click
 import json
 import os
-from httmock import all_requests, HTTMock
-from redash_client.client import RedashClient
+import traceback
+
+import click
 from click.testing import CliRunner
+from httmock import all_requests, HTTMock
+import pytest
+from redash_client.client import RedashClient
+
 from stmocli import cli
 from stmocli.conf import default_path as conf_path
 
