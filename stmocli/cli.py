@@ -77,7 +77,7 @@ def push(conf, file_name, redash_api_key):
                                 query, meta['data_source_id'],
                                 meta['description'], meta['options'])
 
-            m = hashlib.md5(query)
+            m = hashlib.md5(query.encode("utf-8"))
             click.echo("Query ID {} updated with content from {} (md5 {})".format(
                 meta["id"], file_name, m.hexdigest()))
         except RedashClient.RedashClientException as e:

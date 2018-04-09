@@ -105,7 +105,7 @@ def test_push_tracked(runner):
                 file_name
             ])
 
-        m = hashlib.md5(query_after)
+        m = hashlib.md5(query_after.encode("utf-8"))
         expected_output = "Query ID {} updated with content from {} (md5 {})".format(
             query_id, file_name, m.hexdigest())
         assert push_result.output.strip() == expected_output
