@@ -1,8 +1,8 @@
 import traceback
+import hashlib
 import pytest
 import click
 import json
-import md5
 import os
 from httmock import all_requests, HTTMock
 from redash_client.client import RedashClient
@@ -105,8 +105,7 @@ def test_push_tracked(runner):
                 file_name
             ])
 
-        m = md5.new()
-        m.update(query_after)
+        m = hashlib.md5(query_after)
         expected_output = "Query ID {} updated with content from {} (md5 {})".format(
             query_id, file_name, m.hexdigest())
         assert push_result.output.strip() == expected_output

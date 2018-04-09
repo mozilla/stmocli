@@ -2,7 +2,7 @@ from redash_client.client import RedashClient
 from requests.compat import urljoin
 from .conf import Conf
 import click
-import md5
+import hashlib
 import os
 import requests
 
@@ -76,8 +76,8 @@ def push(conf, file_name, redash_api_key):
             redash.update_query(meta['id'], meta['name'],
                                 query, meta['data_source_id'],
                                 meta['description'], meta['options'])
-            m = md5.new()
-            m.update(query)
+
+            m = hashlib.md5(query)
             click.echo("Query ID {} updated with content from {} (md5 {})".format(
                 meta["id"], file_name, m.hexdigest()))
         except RedashClient.RedashClientException as e:
