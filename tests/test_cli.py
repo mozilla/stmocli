@@ -1,12 +1,14 @@
-import traceback
+from functools import partial
 import hashlib
-import pytest
-import click
 import json
 import os
-from httmock import all_requests, HTTMock
-from redash_client.client import RedashClient
+
+import click
 from click.testing import CliRunner
+from httmock import all_requests, HTTMock
+import pytest
+from redash_client.client import RedashClient
+
 from stmocli import cli
 from stmocli.conf import default_path as conf_path
 
@@ -33,14 +35,13 @@ def push_response_fail(url, request):
 
 @pytest.fixture
 def runner():
-    return CliRunner()
+    r = CliRunner()
+    r.invoke = partial(r.invoke, catch_exceptions=False)
+    return r
 
 def test_init(runner):
     with runner.isolated_filesystem():
         result = runner.invoke(cli.init)
-
-        print_debug_for_runner(result)
-
         assert os.path.isfile(conf_path)
 
 def test_track(runner):
@@ -55,8 +56,6 @@ def test_track(runner):
                 '--redash_api_key',
                 'TOTALLY_FAKE_KEY'
             ])
-
-        print_debug_for_runner(result)
 
         # Verify we save the query to the right file
         assert os.path.isfile(file_name)
@@ -138,12 +137,3 @@ def test_push_untracked(runner):
         ])
 
     assert "No such query" in push_result.output
-
-
-def print_debug_for_runner(result):
-    """Helper function for printing click.runner debug tracebacks."""
-    print(result.output)
-    print(result.exc_info)
-    traceback.print_tb(result.exc_info[2])
-    print(result.exit_code)
-    print(result.exception)
