@@ -30,7 +30,8 @@ def init(conf):
     default=lambda: os.environ.get('REDASH_API_KEY', '')
 )
 def track(conf, query_id, file_name, redash_api_key):
-    # Get query: https://github.com/getredash/redash/blob/1573e06e710733714d47940cc1cb196b8116f670/redash/handlers/api.py#L74
+    # Get query:
+    # https://github.com/getredash/redash/blob/1573e06e710733714d47940cc1cb196b8116f670/redash/handlers/api.py#L74
     redash = RedashClient(redash_api_key)
     url_path = 'queries/{}?api_key={}'.format(query_id, redash_api_key)
     try:
