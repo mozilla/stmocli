@@ -3,11 +3,9 @@ import hashlib
 import json
 import os
 
-import click
 from click.testing import CliRunner
 from httmock import all_requests, HTTMock
 import pytest
-from redash_client.client import RedashClient
 
 from stmocli import cli
 from stmocli.conf import default_path as conf_path
@@ -46,7 +44,7 @@ def runner():
 
 def test_init(runner):
     with runner.isolated_filesystem():
-        result = runner.invoke(cli.init)
+        runner.invoke(cli.init)
         assert os.path.isfile(conf_path)
 
 
@@ -56,7 +54,7 @@ def test_track(runner):
 
     with runner.isolated_filesystem():
         with HTTMock(response_content):
-            result = runner.invoke(cli.track, [
+            runner.invoke(cli.track, [
                 query_id,
                 file_name,
                 '--redash_api_key',
@@ -78,7 +76,7 @@ def test_track(runner):
 
 def setup_tracked_query(runner, query_id, file_name):
     with HTTMock(response_content):
-        result = runner.invoke(cli.track, [
+        runner.invoke(cli.track, [
             query_id,
             file_name
         ])
@@ -125,7 +123,7 @@ def test_push_fail(runner):
 
     with runner.isolated_filesystem():
         query_before = setup_tracked_query(runner, query_id, file_name)
-        query_after = update_tracked_query(file_name, query_before)
+        update_tracked_query(file_name, query_before)
 
         # Now push the result, expecting a failure
         with HTTMock(push_response_fail):
