@@ -1,11 +1,12 @@
-from redash_client.client import RedashClient
-from requests.compat import urljoin
-from .conf import Conf
-import click
 import hashlib
 import os
-import requests
 
+import click
+from redash_client.client import RedashClient
+import requests
+from requests.compat import urljoin
+
+from .conf import Conf
 
 pass_conf = click.make_pass_decorator(Conf, ensure=True)
 
