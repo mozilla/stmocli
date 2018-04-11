@@ -74,6 +74,21 @@ def test_track(runner):
             assert config[file_name]['id'] == query_id
 
 
+def test_track_autostub(runner):
+    query_id = '49741'
+    expected_filename = query_id + "_st_mocli_poc.sql"
+
+    with runner.isolated_filesystem():
+        with HTTMock(response_content):
+            runner.invoke(cli.track, [
+                query_id,
+                "--redash_api_key",
+                "TOTALLY_FAKE_KEY",
+            ])
+
+        assert os.path.isfile(expected_filename)
+
+
 def setup_tracked_query(runner, query_id, file_name):
     with HTTMock(response_content):
         runner.invoke(cli.track, [

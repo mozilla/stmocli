@@ -7,6 +7,7 @@ import requests
 from requests.compat import urljoin
 
 from .conf import Conf
+from .util import name_to_stub
 
 pass_conf = click.make_pass_decorator(Conf, ensure=True)
 
@@ -25,7 +26,7 @@ def init(conf):
 @cli.command()
 @pass_conf
 @click.argument('query_id')
-@click.argument('file_name')
+@click.argument('file_name', required=False)
 @click.option(
     '--redash_api_key',
     default=lambda: os.environ.get('REDASH_API_KEY', '')
@@ -40,6 +41,12 @@ def track(conf, query_id, file_name, redash_api_key):
             requests.get,
             urljoin(redash.API_BASE_URL, url_path)
         )
+
+        if not file_name:
+            file_name = "{}_{}.sql".format(
+                query_id,
+                name_to_stub(results["name"]),
+            )
 
         query = results['query']
         with open(file_name, 'w') as outfile:
