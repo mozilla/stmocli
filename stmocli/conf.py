@@ -3,8 +3,9 @@ import os
 
 default_path = './.stmocli.conf'
 
+
 class Conf(object):
-    def __init__(self, path = default_path):
+    def __init__(self, path=default_path):
         self.path = os.path.abspath(path)
 
         if not os.path.isfile(self.path):
