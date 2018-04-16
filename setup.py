@@ -27,4 +27,9 @@ setup(
     ],
     tests_require=test_deps,
     extras_require=extras,
+    entry_points={
+        "console_scripts": [
+            "stmocli=stmocli.cli:cli",
+        ]
+    },
 )
