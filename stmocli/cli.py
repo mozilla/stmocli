@@ -47,7 +47,7 @@ def track(conf, query_id, file_name, redash_api_key):
                 query_id,
                 name_to_stub(results["name"]),
             )
-            file_name = click.prompt("Query filename", default=default_file_name)
+            file_name = click.prompt("Filename for tracked query SQL", default=default_file_name)
 
         query = results['query']
         with open(file_name, 'w') as outfile:
