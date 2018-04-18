@@ -80,11 +80,12 @@ def test_track_autostub(runner):
 
     with runner.isolated_filesystem():
         with HTTMock(response_content):
-            runner.invoke(cli.track, [
-                query_id,
-                "--redash_api_key",
-                "TOTALLY_FAKE_KEY",
-            ])
+            runner.invoke(
+                cli.track,
+                [query_id,
+                 "--redash_api_key",
+                 "TOTALLY_FAKE_KEY"],
+                input="\n")
 
         assert os.path.isfile(expected_filename)
 
