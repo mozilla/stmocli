@@ -49,7 +49,7 @@ def runner():
 
 def test_init(runner):
     with runner.isolated_filesystem():
-        runner.invoke(cli.init)
+        runner.invoke(cli.cli, ["init"])
         assert os.path.isfile(conf_path)
 
 
@@ -59,12 +59,14 @@ def test_track(runner):
 
     with runner.isolated_filesystem():
         with HTTMock(response_content):
-            runner.invoke(cli.track, [
+            result = runner.invoke(cli.cli, [
+                '--redash_api_key',
+                'TOTALLY_FAKE_KEY',
+                "track",
                 query_id,
                 file_name,
-                '--redash_api_key',
-                'TOTALLY_FAKE_KEY'
             ])
+            assert result.exit_code == 0
 
         # Verify we save the query to the right file
         assert os.path.isfile(file_name)
@@ -86,10 +88,12 @@ def test_track_autostub(runner):
     with runner.isolated_filesystem():
         with HTTMock(response_content):
             runner.invoke(
-                cli.track,
-                [query_id,
-                 "--redash_api_key",
-                 "TOTALLY_FAKE_KEY"],
+                cli.cli, [
+                    "--redash_api_key",
+                    "TOTALLY_FAKE_KEY",
+                    "track",
+                    query_id,
+                 ],
                 input="\n")
 
         assert os.path.isfile(expected_filename)
@@ -97,7 +101,8 @@ def test_track_autostub(runner):
 
 def setup_tracked_query(runner, query_id, file_name):
     with HTTMock(response_content):
-        runner.invoke(cli.track, [
+        runner.invoke(cli.cli, [
+            "track",
             query_id,
             file_name
         ])
@@ -128,7 +133,8 @@ def test_push_tracked(runner):
 
         # Now push the result
         with HTTMock(push_response):
-            push_result = runner.invoke(cli.push, [
+            push_result = runner.invoke(cli.cli, [
+                "push",
                 file_name
             ])
 
@@ -148,7 +154,8 @@ def test_push_fail(runner):
 
         # Now push the result, expecting a failure
         with HTTMock(push_response_fail):
-            push_result = runner.invoke(cli.push, [
+            push_result = runner.invoke(cli.cli, [
+                "push",
                 file_name
             ])
 
@@ -162,7 +169,8 @@ def test_push_untracked(runner):
 
     # Try to push a nonexistent query
     with HTTMock(push_response):
-        push_result = runner.invoke(cli.push, [
+        push_result = runner.invoke(cli.cli, [
+            "push",
             file_name
         ])
 

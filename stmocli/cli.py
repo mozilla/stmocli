@@ -2,6 +2,7 @@ import hashlib
 import os
 import sys
 
+import attr
 import click
 from redash_client.client import RedashClient
 import requests
@@ -10,33 +11,41 @@ from requests.compat import urljoin
 from .conf import Conf
 from .util import name_to_stub
 
-pass_conf = click.make_pass_decorator(Conf, ensure=True)
+
+@attr.s
+class SharedOptions(object):
+    redash_api_key = attr.ib()
+    conf = attr.ib()
 
 
 @click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@pass_conf
-def init(conf):
-    conf.init_file()
-
-
-@cli.command()
-@pass_conf
-@click.argument('query_id')
-@click.argument('file_name', required=False)
 @click.option(
     '--redash_api_key',
     default=lambda: os.environ.get('REDASH_API_KEY', '')
 )
-def track(conf, query_id, file_name, redash_api_key):
+@click.pass_context
+def cli(ctx, redash_api_key):
+    ctx.obj = SharedOptions(
+        redash_api_key=redash_api_key,
+        conf=Conf(),
+    )
+
+
+@cli.command()
+@click.pass_obj
+def init(shared):
+    shared.conf.init_file()
+
+
+@cli.command()
+@click.pass_obj
+@click.argument('query_id')
+@click.argument('file_name', required=False)
+def track(shared, query_id, file_name):
     # Get query:
     # https://github.com/getredash/redash/blob/1573e06e710733714d47940cc1cb196b8116f670/redash/handlers/api.py#L74
-    redash = RedashClient(redash_api_key)
-    url_path = 'queries/{}?api_key={}'.format(query_id, redash_api_key)
+    redash = RedashClient(shared.redash_api_key)
+    url_path = 'queries/{}?api_key={}'.format(query_id, shared.redash_api_key)
     try:
         results, response = redash._make_request(
             requests.get,
@@ -61,24 +70,20 @@ def track(conf, query_id, file_name, redash_api_key):
             "schedule": results['schedule'],
             "options": results['options']
         }
-        conf.add_query(file_name, query_meta)
+        shared.conf.add_query(file_name, query_meta)
         click.echo("Tracking Query ID {} in {}".format(query_id, file_name))
     except RedashClient.RedashClientException as e:
         click.echo("Failed to track Query ID {}: {}".format(query_id, e))
 
 
 @cli.command()
-@pass_conf
+@click.pass_obj
 @click.argument('file_name')
-@click.option(
-    '--redash_api_key',
-    default=lambda: os.environ.get('REDASH_API_KEY', '')
-)
-def push(conf, file_name, redash_api_key):
-    redash = RedashClient(redash_api_key)
+def push(shared, file_name):
+    redash = RedashClient(shared.redash_api_key)
 
     try:
-        meta = conf.get_query(file_name)
+        meta = shared.conf.get_query(file_name)
         with open(file_name, 'r') as fin:
             query = fin.read()
 
