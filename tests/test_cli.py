@@ -184,6 +184,6 @@ def test_view(launch, runner):
         setup_tracked_query(runner, "123", "query.sql")
         result = runner.invoke(cli.view, ["query.sql"])
     assert result.exit_code == 0
-    assert launch.called_once()
+    launch.assert_called_once()
     args, _kwargs = launch.call_args
     assert args[0].endswith("/123")
