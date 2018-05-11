@@ -1,5 +1,6 @@
 import hashlib
 import os
+import sys
 
 import click
 from redash_client.client import RedashClient
@@ -94,6 +95,21 @@ def push(conf, file_name, redash_api_key):
     except KeyError as e:
         click.echo("Failed to update query from {}: No such query, "
                    "maybe you need to 'track' first".format(file_name))
+
+
+@cli.command()
+@pass_conf
+@click.argument('file_name')
+def view(conf, file_name):
+    try:
+        meta = conf.get_query(file_name)
+    except KeyError:
+        click.echo("Couldn't find a query ID for {}: No such query, "
+                   "maybe you need to 'track' first".format(file_name),
+                   err=True)
+        sys.exit(1)
+    url = urljoin(RedashClient.BASE_URL, "queries/{id}".format(**meta))
+    click.launch(url)
 
 
 if __name__ == '__main__':

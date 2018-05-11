@@ -3,6 +3,11 @@ import hashlib
 import json
 import os
 
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
 from click.testing import CliRunner
 from httmock import all_requests, HTTMock
 import pytest
@@ -162,3 +167,23 @@ def test_push_untracked(runner):
         ])
 
     assert "No such query" in push_result.output
+
+
+@patch("click.launch")
+def test_view_unknown(launch, runner):
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli.view, ["spam"])
+        assert result.exit_code != 0
+        assert "No such query" in result.output
+        launch.assert_not_called()
+
+
+@patch("click.launch")
+def test_view(launch, runner):
+    with runner.isolated_filesystem():
+        setup_tracked_query(runner, "123", "query.sql")
+        result = runner.invoke(cli.view, ["query.sql"])
+    assert result.exit_code == 0
+    assert launch.called_once()
+    args, _kwargs = launch.call_args
+    assert args[0].endswith("/123")
