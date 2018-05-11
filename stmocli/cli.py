@@ -43,8 +43,7 @@ def track(conf, query_id, file_name, redash_api_key):
         )
 
         if not file_name:
-            default_file_name = "{}_{}.sql".format(
-                query_id,
+            default_file_name = "{}.sql".format(
                 name_to_stub(results["name"]),
             )
             file_name = click.prompt("Filename for tracked query SQL", default=default_file_name)
