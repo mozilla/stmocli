@@ -6,6 +6,7 @@ test_deps = [
     'pytest-cov',
     'pytest',
     'httmock',
+    'mock;python_version<"3.3"'
 ]
 
 extras = {
