@@ -14,6 +14,26 @@ In re:dash, it's difficult to get review, track revisions, or collaborate on que
 St. Mocli is currently [vaporware](https://en.wikipedia.org/wiki/Vaporware),
 so this workflow is going to change.
 
+## Preliminaries
+
+You should have a Redash API key to perform most operations.
+You can get one from your
+[Redash user settings page](https://sql.telemetry.mozilla.org/users/me).
+
+Then, add something like:
+
+```bash
+export REDASH_API_KEY="Tua1aith1ay9roh5thuGhoh6sa3raene"
+```
+
+to your ~/.bash_profile, or pass the key to stmocli on the command line like:
+
+```bash
+stmocli --redash-api-key Tua1aith1ay9roh5thuGhoh6sa3raene view query.sql
+```
+
+Note that `--redash-api-key` has to come before the verb on the command line.
+
 ## `init` a directory
 
 **Implemented**!
