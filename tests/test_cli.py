@@ -180,7 +180,7 @@ def test_push_untracked(runner):
 @patch("click.launch")
 def test_view_unknown(launch, runner):
     with runner.isolated_filesystem():
-        result = runner.invoke(cli.view, ["spam"])
+        result = runner.invoke(cli.cli, ["view", "spam"])
         assert result.exit_code != 0
         assert "No such query" in result.output
         launch.assert_not_called()
@@ -190,7 +190,7 @@ def test_view_unknown(launch, runner):
 def test_view(launch, runner):
     with runner.isolated_filesystem():
         setup_tracked_query(runner, "123", "query.sql")
-        result = runner.invoke(cli.view, ["query.sql"])
+        result = runner.invoke(cli.cli, ["view", "query.sql"])
     assert result.exit_code == 0
     launch.assert_called_once()
     args, _kwargs = launch.call_args

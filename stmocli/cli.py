@@ -103,11 +103,11 @@ def push(shared, file_name):
 
 
 @cli.command()
-@pass_conf
+@click.pass_obj
 @click.argument('file_name')
-def view(conf, file_name):
+def view(shared, file_name):
     try:
-        meta = conf.get_query(file_name)
+        meta = shared.conf.get_query(file_name)
     except KeyError:
         click.echo("Couldn't find a query ID for {}: No such query, "
                    "maybe you need to 'track' first".format(file_name),
