@@ -188,10 +188,13 @@ def test_view_unknown(launch, runner):
 
 @patch("click.launch")
 def test_view(launch, runner):
+    query_id = '49741'
+    file_name = 'poc.sql'
+
     with runner.isolated_filesystem():
-        setup_tracked_query(runner, "123", "query.sql")
-        result = runner.invoke(cli.cli, ["view", "query.sql"])
+        setup_tracked_query(runner, query_id, file_name)
+        result = runner.invoke(cli.cli, ["view", file_name])
     assert result.exit_code == 0
     launch.assert_called_once()
     args, _kwargs = launch.call_args
-    assert args[0].endswith("/123")
+    assert args[0].endswith("/" + query_id)

@@ -65,7 +65,7 @@ def push(stmo, file_name):
 
     m = hashlib.md5(query.encode("utf-8"))
     click.echo("Query ID {} updated with content from {} (md5 {})".format(
-        queryinfo["id"], file_name, m.hexdigest()))
+        queryinfo.id, file_name, m.hexdigest()))
 
 
 @cli.command()
