@@ -2,7 +2,7 @@ from redash_client.client import RedashClient
 import requests
 from requests.compat import urljoin
 
-from .conf import Conf
+from .conf import Conf, QueryInfo
 
 
 class STMO(object):
@@ -51,15 +51,8 @@ class STMO(object):
         query_file_name = file_name(query) if callable(file_name) else file_name
         with open(query_file_name, "w") as outfile:
             outfile.write(query["query"])
-        query_meta = {
-            "id": query_id,
-            "data_source_id": query["data_source_id"],
-            "name": query["name"],
-            "description": query["description"],
-            "schedule": query["schedule"],
-            "options": query["options"]
-        }
-        self.conf.add_query(query_file_name, query_meta)
+        query_info = QueryInfo.from_dict(query)
+        self.conf.add_query(query_file_name, query_info)
         return query
 
     def push_query(self, file_name):
@@ -69,21 +62,22 @@ class STMO(object):
             file_name (str): file_name of a tracked query
 
         Returns:
-            meta (dict): The query metadata
+            query_info (QueryInfo): The query metadata
 
         Throws:
             KeyError: if query is not tracked
             RedashClientException
         """
-        meta = self.conf.get_query(file_name)
+        query_info = self.conf.get_query(file_name)
         with open(file_name, 'r') as fin:
             sql = fin.read()
         self._redash.update_query(
-            meta['id'], meta['name'],
-            sql, meta['data_source_id'],
-            meta['description'], meta['options'])
-        return meta
+            query_info.id, query_info.name, sql,
+            query_info.data_source_id, query_info.description,
+            query_info.options
+        )
+        return query_info
 
     def url_for_query(self, file_name):
         meta = self.conf.get_query(file_name)
-        return urljoin(RedashClient.BASE_URL, "queries/{id}".format(**meta))
+        return urljoin(RedashClient.BASE_URL, "queries/{}".format(meta.id))
