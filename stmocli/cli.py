@@ -40,7 +40,7 @@ def track(stmo, query_id, file_name):
     try:
         stmo.track_query(query_id, make_file_name)
     except STMO.RedashClientException as e:
-        click.echo("Failed to track Query ID {}: {}".format(query_id, e))
+        click.echo("Failed to track Query ID {}: {}".format(query_id, e), err=True)
         sys.exit(1)
 
     click.echo("Tracking Query ID {} in {}".format(query_id, file_name))
@@ -53,11 +53,11 @@ def push(stmo, file_name):
     try:
         queryinfo = stmo.push_query(file_name)
     except stmo.RedashClientException as e:
-        click.echo("Failed to update query from {}: {}".format(file_name, e))
+        click.echo("Failed to update query from {}: {}".format(file_name, e), err=True)
         sys.exit(1)
     except KeyError as e:
         click.echo("Failed to update query from {}: No such query, "
-                   "maybe you need to 'track' first".format(file_name))
+                   "maybe you need to 'track' first".format(file_name), err=True)
         sys.exit(1)
 
     with open(file_name, "rt") as f:
