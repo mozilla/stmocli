@@ -17,8 +17,11 @@ class Conf(object):
                 self.contents = json.loads(conf_file.read())
 
     def init_file(self):
-        with open(self.path, 'a') as conf_file:
+        if os.path.exists(self.path):
+            return False
+        with open(self.path, 'w') as conf_file:
             conf_file.write(json.dumps({}))
+        return True
 
     def save(self):
         with open(self.path, 'w') as conf_file:
