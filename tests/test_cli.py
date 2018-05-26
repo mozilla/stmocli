@@ -9,11 +9,12 @@ except ImportError:
     from mock import patch
 
 from click.testing import CliRunner
-from httmock import all_requests, HTTMock
+from httmock import all_requests, HTTMock, urlmatch
 import pytest
 
 from stmocli import cli
 from stmocli.conf import default_path as conf_path
+from stmocli.conf import Conf
 
 
 with open('tests/data/example_query_response.json', 'rt') as infile:
@@ -38,6 +39,22 @@ def push_response(url, request):
 def push_response_fail(url, request):
     return {'status_code': 500,
             'content': '{}'}
+
+
+@urlmatch(path=r'.*/fork')
+def fork_response(url, request):
+    return {
+        'status_code': 200,
+        'content': json.dumps({
+            'id': '1234',
+            'query': 'SELECT * FROM foo',
+            'data_source_id': 0,
+        })}
+
+
+@all_requests
+def not_found_response(url, request):
+    return {'status_code': 404}
 
 
 @pytest.fixture
@@ -198,3 +215,40 @@ def test_view(launch, runner):
     launch.assert_called_once()
     args, _kwargs = launch.call_args
     assert args[0].endswith("/" + query_id)
+
+
+def test_fork(runner):
+    query_id = '49741'
+    file_name = 'poc.sql'
+
+    with runner.isolated_filesystem():
+        setup_tracked_query(runner, query_id, file_name)
+        with HTTMock(fork_response, response_content):
+            result = runner.invoke(cli.cli, ["fork", file_name, "fork.sql"])
+        assert result.exit_code == 0
+        assert os.path.exists("fork.sql")
+        assert Conf().get_query("fork.sql")
+    assert result.exit_code == 0
+
+
+def test_fork_rejects_bogus_filename(runner):
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli.cli, ["fork", "spam", "fork.sql"])
+        assert result.exit_code == 1
+        assert not os.path.exists("fork.sql")
+
+
+def test_fork_handles_404(runner):
+    with runner.isolated_filesystem():
+        with HTTMock(not_found_response):
+            result = runner.invoke(cli.cli, ["fork", "99999", "fork.sql"])
+        assert result.exit_code == 1
+
+
+def test_fork_rejects_untracked_file(runner):
+    with runner.isolated_filesystem():
+        with open("spam.sql", "w") as f:
+            f.write("eggs")
+        result = runner.invoke(cli.cli, ["fork", "spam.sql", "fork.sql"])
+        assert result.exit_code == 1
+        assert "track" in result.output
