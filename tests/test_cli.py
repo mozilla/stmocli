@@ -225,7 +225,6 @@ def test_fork(runner):
         setup_tracked_query(runner, query_id, file_name)
         with HTTMock(fork_response, response_content):
             result = runner.invoke(cli.cli, ["fork", file_name, "fork.sql"])
-        assert result.exit_code == 0
         assert os.path.exists("fork.sql")
         assert Conf().get_query("fork.sql")
     assert result.exit_code == 0
@@ -234,15 +233,17 @@ def test_fork(runner):
 def test_fork_rejects_bogus_filename(runner):
     with runner.isolated_filesystem():
         result = runner.invoke(cli.cli, ["fork", "spam", "fork.sql"])
-        assert result.exit_code == 1
-        assert not os.path.exists("fork.sql")
+    assert result.exit_code == 1
+    assert not os.path.exists("fork.sql")
+    assert "no file or query" in result.output
 
 
 def test_fork_handles_404(runner):
     with runner.isolated_filesystem():
         with HTTMock(not_found_response):
             result = runner.invoke(cli.cli, ["fork", "99999", "fork.sql"])
-        assert result.exit_code == 1
+    assert result.exit_code == 1
+    assert "Couldn't find a query with ID" in result.output
 
 
 def test_fork_rejects_untracked_file(runner):
@@ -250,5 +251,5 @@ def test_fork_rejects_untracked_file(runner):
         with open("spam.sql", "w") as f:
             f.write("eggs")
         result = runner.invoke(cli.cli, ["fork", "spam.sql", "fork.sql"])
-        assert result.exit_code == 1
-        assert "track" in result.output
+    assert result.exit_code == 1
+    assert "track" in result.output
