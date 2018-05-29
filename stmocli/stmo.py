@@ -45,7 +45,7 @@ class STMO(object):
                 If callable, receives the Redash query object as a parameter.
 
         Returns:
-            query (dict): The response from redash, representing a Query model.
+            query_info (QueryInfo): Metadata about the tracked query
         """
         query = self.get_query(query_id)
         query_file_name = file_name(query) if callable(file_name) else file_name
@@ -53,7 +53,7 @@ class STMO(object):
             outfile.write(query["query"])
         query_info = QueryInfo.from_dict(query)
         self.conf.add_query(query_file_name, query_info)
-        return query
+        return query_info
 
     def push_query(self, file_name):
         """Replaces the SQL on Redash with the local version of a tracked query.
@@ -81,3 +81,8 @@ class STMO(object):
     def url_for_query(self, file_name):
         meta = self.conf.get_query(file_name)
         return urljoin(RedashClient.BASE_URL, "queries/{}".format(meta.id))
+
+    def fork_query(self, query_id, new_query_file_name):
+        result = self._redash.fork_query(query_id)
+        fork = self.track_query(result["id"], new_query_file_name)
+        return fork
