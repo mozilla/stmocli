@@ -70,6 +70,21 @@ def test_init(runner):
         assert os.path.isfile(conf_path)
 
 
+def test_init_is_idempotent(runner):
+    spam = '{"spam": "spam"}\n'
+    with runner.isolated_filesystem():
+        assert not os.path.exists(conf_path)
+        r1 = runner.invoke(cli.cli, ["init"])
+        assert r1.exit_code == 0
+        assert os.path.exists(conf_path)
+        with open(conf_path, "w") as f:
+            f.write(spam)
+        r2 = runner.invoke(cli.cli, ["init"])
+        assert r2.exit_code == 0
+        with open(conf_path, "r") as f:
+            assert f.read() == spam
+
+
 def test_track(runner):
     query_id = '49741'
     file_name = 'poc.sql'
