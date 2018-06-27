@@ -117,7 +117,7 @@ def view(stmo, file_name):
 @click.argument('query_to_fork')
 @click.argument('new_query_file_name')
 def fork(stmo, query_to_fork, new_query_file_name):
-    """Copies a STMO  query and tracks the result.
+    """Copies a STMO query and tracks the result.
 
     QUERY_TO_FORK: Either the filename of a query that's already tracked,
     or the numeric ID of any redash query.
