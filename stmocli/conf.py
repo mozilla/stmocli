@@ -28,11 +28,11 @@ class Conf(object):
             conf_file.write(json.dumps(self.contents, sort_keys=True,
                                        indent=2, separators=(',', ': ')))
 
-    def add_query(self, file_name, query_metadata):
+    def add_query(self, file_name, query_info):
         if file_name in self.contents:
             print('Query, "{}" already tracked!'.format(file_name))
         else:
-            self.contents[file_name] = query_metadata.to_dict()
+            self.contents[file_name] = query_info.to_dict()
             self.save()
 
     def get_query(self, file_name):

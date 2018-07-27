@@ -18,6 +18,28 @@ class STMO(object):
         self._redash = RedashClient(redash_api_key)
         self.redash_api_key = redash_api_key
 
+    def start_query(self, file_name, data_source_id=1, description=None):
+        """Add a query created locally to .stmocli.conf.
+
+        Returns:
+
+        """
+        with open(file_name, 'r') as fin:
+            sql = fin.read()
+        query_id = self._redash._get_new_query_id(name=file_name, sql_query=sql,
+                                                  data_source_id=data_source_id,
+                                                  description=description)
+        if query_id:
+            info = dict(id=query_id, data_source_id=data_source_id,
+                        name=file_name, description=description)
+            query_info = QueryInfo.from_dict(info)
+            self.conf.add_query(file_name, query_info)
+
+            return file_name
+        else:
+            return False
+
+
     def get_query(self, query_id):
         """Fetches information about a query from Redash.
 
@@ -47,10 +69,11 @@ class STMO(object):
         Returns:
             query_info (QueryInfo): Metadata about the tracked query
         """
-        query = self.get_query(query_id)
-        query_file_name = file_name(query) if callable(file_name) else file_name
-        with open(query_file_name, "w") as outfile:
-            outfile.write(query["query"])
+        if query_id:
+            query = self.get_query(query_id)
+            query_file_name = file_name(query) if callable(file_name) else file_name
+            with open(query_file_name, "w") as outfile:
+                outfile.write(query["query"])
         query_info = QueryInfo.from_dict(query)
         self.conf.add_query(query_file_name, query_info)
         return query_info
