@@ -174,5 +174,6 @@ def write_csv(stmo, query_id, file_name):
         dict_writer.writeheader()
         dict_writer.writerows(results)
 
+
 if __name__ == '__main__':
     cli()
