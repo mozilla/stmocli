@@ -86,3 +86,27 @@ class STMO(object):
         result = self._redash.fork_query(query_id)
         fork = self.track_query(result["id"], new_query_file_name)
         return fork
+
+    def get_results(self, query_id):
+        """Pull the existing dataset from a query using the query id
+        Doesn't have to be tracked - we will pull the query syntax from stmo
+        and use that.
+
+        Args:
+            query_id: redash id of the query
+
+        Returns:
+            1. The name of the query, to be used for csv filenames if desired
+            2. List of dicts, one dict per row of results. Dicts are keyed by
+            column labels of the returned data.
+
+        Raises:
+            RedashClientException if query id not found on redash
+        """
+        query = self.get_query(query_id)
+        sql_query = query["query"]
+        query_info = QueryInfo.from_dict(query)
+        data_source_id = query_info.data_source_id
+        query_name = query_info.name
+        results = self._redash.get_query_results(sql_query, data_source_id)
+        return(query_name, results)

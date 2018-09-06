@@ -1,7 +1,7 @@
 import hashlib
 import os
 import sys
-
+import csv
 import click
 
 from .stmo import STMO
@@ -147,6 +147,31 @@ def fork(stmo, query_to_fork, new_query_file_name):
 
     click.echo("Forked query {} to {}: {}".format(query_id, new_query_file_name, result.name))
 
+@cli.command()
+@click.pass_obj
+@click.argument('query_id')
+@click.argument('file_name', required=False)
+def csv(stmo, query_id, file_name):
+    """gets the dataset resulting from the query_id and writes to a csv.
+    data must already exist, this does not execute the query on the server.
+    csv will have variable names as first row.
+
+    QUERY_ID: redash id of the query you want data from
+
+    FILE_NAME: optional, filename (with absolute path) of csv file. if None,
+    use the query's name + .csv and write to pwd
+    """
+    try:
+        query_name, results = stmo.get_results(query_id)
+    except STMO.RedashClientException:
+        click.echo("Couldn't find a query with ID {} on the server.".format(query_id), err=True)
+        sys.exit(1)
+    fn = file_name if file_name else query_name + '.csv'
+    headers = results[0].keys()
+    with open(fn, 'wb') as output_file:
+        dict_writer = csv.DictWriter(output_file, headers)
+        dict_writer.writeheader()
+        dict_writer.writerows(results)
 
 if __name__ == '__main__':
     cli()
