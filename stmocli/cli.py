@@ -147,11 +147,12 @@ def fork(stmo, query_to_fork, new_query_file_name):
 
     click.echo("Forked query {} to {}: {}".format(query_id, new_query_file_name, result.name))
 
+
 @cli.command()
 @click.pass_obj
 @click.argument('query_id')
 @click.argument('file_name', required=False)
-def csv(stmo, query_id, file_name):
+def write_csv(stmo, query_id, file_name):
     """gets the dataset resulting from the query_id and writes to a csv.
     data must already exist, this does not execute the query on the server.
     csv will have variable names as first row.
