@@ -279,7 +279,6 @@ def test_fork_rejects_untracked_file(runner):
         with open("spam.sql", "w") as f:
             f.write("eggs")
         result = runner.invoke(cli.cli, ["fork", "spam.sql", "fork.sql"])
-    print(result.exit_code)
     assert result.exit_code == 1
     assert "track" in result.output
 
