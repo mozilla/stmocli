@@ -167,9 +167,10 @@ def write_csv(stmo, query_id, file_name):
     except STMO.RedashClientException:
         click.echo("Couldn't find a query with ID {} on the server.".format(query_id), err=True)
         sys.exit(1)
+        return
     fn = file_name if file_name else query_name + '.csv'
     headers = results[0].keys()
-    with open(fn, 'wb') as output_file:
+    with open(fn, 'w') as output_file:
         dict_writer = csv.DictWriter(output_file, headers)
         dict_writer.writeheader()
         dict_writer.writerows(results)
