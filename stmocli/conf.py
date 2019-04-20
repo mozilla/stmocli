@@ -38,6 +38,9 @@ class Conf(object):
     def get_query(self, file_name):
         return QueryInfo.from_dict(self.contents[file_name])
 
+    def get_filenames(self):
+        return self.contents.keys()
+
 
 @attr.s
 class QueryInfo(object):

@@ -17,15 +17,26 @@ from stmocli.conf import default_path as conf_path
 from stmocli.conf import Conf
 
 
-with open('tests/data/example_query_response.json', 'rt') as infile:
-    example_response = infile.read()
+with open('tests/data/49741.json', 'rt') as infile:
+    query_49741_response = infile.read()
+
+with open('tests/data/62375.json', 'rt') as infile:
+    query_62375_response = infile.read()
 
 
 @all_requests
-def response_content(url, request):
+def response_49741_content(url, request):
     return {
         'status_code': 200,
-        'content': example_response,
+        'content': query_49741_response
+    }
+
+
+@all_requests
+def response_62375_content(url, request):
+    return {
+        'status_code': 200,
+        'content': query_62375_response
     }
 
 
@@ -90,7 +101,7 @@ def test_track(runner):
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        with HTTMock(response_content):
+        with HTTMock(response_49741_content):
             result = runner.invoke(cli.cli, [
                 '--redash_api_key',
                 'TOTALLY_FAKE_KEY',
@@ -118,7 +129,7 @@ def test_track_autostub(runner):
     expected_filename = "st_mocli_poc.sql"
 
     with runner.isolated_filesystem():
-        with HTTMock(response_content):
+        with HTTMock(response_49741_content):
             runner.invoke(
                 cli.cli, [
                     "--redash_api_key",
@@ -131,8 +142,8 @@ def test_track_autostub(runner):
         assert os.path.isfile(expected_filename)
 
 
-def setup_tracked_query(runner, query_id, file_name):
-    with HTTMock(response_content):
+def setup_tracked_query(runner, query_id, file_name, content):
+    with HTTMock(content):
         runner.invoke(cli.cli, [
             "track",
             query_id,
@@ -159,7 +170,7 @@ def test_push_tracked(runner):
 
     with runner.isolated_filesystem():
         # Track the example query
-        query_before = setup_tracked_query(runner, query_id, file_name)
+        query_before = setup_tracked_query(runner, query_id, file_name, response_49741_content)
         # Overwrite with a new query string
         query_after = update_tracked_query(file_name, query_before)
 
@@ -176,12 +187,67 @@ def test_push_tracked(runner):
         assert push_result.output.strip() == expected_output
 
 
+def test_push_multi(runner):
+    with runner.isolated_filesystem():
+        query_49741_before = setup_tracked_query(runner, '49741', '49741.sql',
+                                                 response_49741_content)
+        query_62375_before = setup_tracked_query(runner, '62375', '62375.sql',
+                                                 response_62375_content)
+
+        # Overwrite with a new query string
+        query_49741_after = update_tracked_query('49741.sql', query_49741_before)
+        query_62375_after = update_tracked_query('62375.sql', query_62375_before)
+
+        # Now push the result
+        with HTTMock(push_response):
+            push_result = runner.invoke(cli.cli, [
+                "push",
+                "49741.sql",
+                "62375.sql"
+            ])
+
+        m = hashlib.md5(query_62375_after.encode("utf-8"))
+        expected_output_62375 = "Query ID 62375 updated with content from 62375.sql " + \
+                                "(md5 {})".format(m.hexdigest())
+        m = hashlib.md5(query_49741_after.encode("utf-8"))
+        expected_output_49741 = "Query ID 49741 updated with content from 49741.sql " + \
+                                "(md5 {})".format(m.hexdigest())
+
+        assert push_result.output.strip() == expected_output_49741 + "\n" + expected_output_62375
+
+def test_push_all(runner):
+    with runner.isolated_filesystem():
+        query_49741_before = setup_tracked_query(runner, '49741', '49741.sql',
+                                                 response_49741_content)
+        query_62375_before = setup_tracked_query(runner, '62375', '62375.sql',
+                                                 response_62375_content)
+
+        # Overwrite with a new query string
+        query_49741_after = update_tracked_query('49741.sql', query_49741_before)
+        query_62375_after = update_tracked_query('62375.sql', query_62375_before)
+
+        # Now push the result
+        with HTTMock(push_response):
+            push_result = runner.invoke(cli.cli, [
+                "push"
+            ])
+
+        m = hashlib.md5(query_62375_after.encode("utf-8"))
+        expected_output_62375 = "Query ID 62375 updated with content from 62375.sql " + \
+                                "(md5 {})".format(m.hexdigest())
+        m = hashlib.md5(query_49741_after.encode("utf-8"))
+        expected_output_49741 = "Query ID 49741 updated with content from 49741.sql " + \
+                                "(md5 {})".format(m.hexdigest())
+
+        assert push_result.output.strip() == expected_output_49741 + "\n" + expected_output_62375
+
+
 def test_push_fail(runner):
     query_id = '49741'
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        query_before = setup_tracked_query(runner, query_id, file_name)
+        query_before = setup_tracked_query(runner, query_id, file_name, response_49741_content)
         update_tracked_query(file_name, query_before)
 
         # Now push the result, expecting a failure
@@ -224,7 +290,7 @@ def test_view(launch, runner):
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        setup_tracked_query(runner, query_id, file_name)
+        setup_tracked_query(runner, query_id, file_name, response_49741_content)
         result = runner.invoke(cli.cli, ["view", file_name])
     assert result.exit_code == 0
     launch.assert_called_once()
@@ -237,8 +303,8 @@ def test_fork(runner):
     file_name = 'poc.sql'
 
     with runner.isolated_filesystem():
-        setup_tracked_query(runner, query_id, file_name)
-        with HTTMock(fork_response, response_content):
+        setup_tracked_query(runner, query_id, file_name, response_49741_content)
+        with HTTMock(fork_response, response_49741_content):
             result = runner.invoke(cli.cli, ["fork", file_name, "fork.sql"])
         assert os.path.exists("fork.sql")
         assert Conf().get_query("fork.sql")
