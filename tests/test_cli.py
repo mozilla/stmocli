@@ -215,6 +215,7 @@ def test_push_multi(runner):
 
         assert push_result.output.strip() == expected_output_49741 + "\n" + expected_output_62375
 
+
 def test_push_all(runner):
     with runner.isolated_filesystem():
         query_49741_before = setup_tracked_query(runner, '49741', '49741.sql',
@@ -232,14 +233,17 @@ def test_push_all(runner):
                 "push"
             ])
 
-        m = hashlib.md5(query_62375_after.encode("utf-8"))
-        expected_output_62375 = "Query ID 62375 updated with content from 62375.sql " + \
-                                "(md5 {})".format(m.hexdigest())
-        m = hashlib.md5(query_49741_after.encode("utf-8"))
-        expected_output_49741 = "Query ID 49741 updated with content from 49741.sql " + \
-                                "(md5 {})".format(m.hexdigest())
+        expected_output = set([
+            "Query ID 62375 updated with content from 62375.sql " +
+            "(md5 {})".format(hashlib.md5(query_62375_after.encode("utf-8")).hexdigest()),
 
-        assert push_result.output.strip() == expected_output_49741 + "\n" + expected_output_62375
+            "Query ID 49741 updated with content from 49741.sql " +
+            "(md5 {})".format(hashlib.md5(query_49741_after.encode("utf-8")).hexdigest())
+        ])
+
+        actual_output = set(push_result.output.strip().split("\n"))
+
+        assert expected_output == actual_output
 
 
 def test_push_fail(runner):
