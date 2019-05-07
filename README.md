@@ -96,11 +96,13 @@ Be sure to use version control.
 
 **Implemented!**
 
-`stmocli push <filename>`
+`stmocli push [<filename>...]`
 
 Pushes the current SQL statements and metadata to re:dash for the given query file.
 
-`<filename>` must be a key in the dictionary stored in `.stmocli.conf`
+You can specify one or more query files to be pushed, these must be keys in the
+dictionary stored in `.stmocli.conf`. If no file names are specified, all SQL
+statements are pushed.
 
 # Roadmap
 
