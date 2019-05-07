@@ -18,6 +18,9 @@ class STMO(object):
         self._redash = RedashClient(redash_api_key)
         self.redash_api_key = redash_api_key
 
+    def get_tracked_filenames(self):
+        return self.conf.get_filenames()
+
     def get_query(self, query_id):
         """Fetches information about a query from Redash.
 

@@ -66,30 +66,34 @@ def track(stmo, query_id, file_name):
 
 @cli.command()
 @click.pass_obj
-@click.argument('file_name')
-def push(stmo, file_name):
+@click.argument('file_names', required=False, nargs=-1)
+def push(stmo, file_names):
     """Uploads a tracked query to STMO.
 
     FILE_NAME: The filename of the tracked query SQL.
 
     Overwrites the STMO query SQL with the version in the local repository.
     """
-    try:
-        queryinfo = stmo.push_query(file_name)
-    except stmo.RedashClientException as e:
-        click.echo("Failed to update query from {}: {}".format(file_name, e), err=True)
-        sys.exit(1)
-    except KeyError as e:
-        click.echo("Failed to update query from {}: No such query, "
-                   "maybe you need to 'track' first".format(file_name), err=True)
-        sys.exit(1)
+    if not file_names:
+        file_names = stmo.get_tracked_filenames()
 
-    with open(file_name, "rt") as f:
-        query = f.read()
+    for file_name in file_names:
+        try:
+            queryinfo = stmo.push_query(file_name)
+        except stmo.RedashClientException as e:
+            click.echo("Failed to update query from {}: {}".format(file_name, e), err=True)
+            sys.exit(1)
+        except KeyError as e:
+            click.echo("Failed to update query from {}: No such query, "
+                       "maybe you need to 'track' first".format(file_name), err=True)
+            sys.exit(1)
 
-    m = hashlib.md5(query.encode("utf-8"))
-    click.echo("Query ID {} updated with content from {} (md5 {})".format(
-        queryinfo.id, file_name, m.hexdigest()))
+        with open(file_name, "rt") as f:
+            query = f.read()
+
+        m = hashlib.md5(query.encode("utf-8"))
+        click.echo("Query ID {} updated with content from {} (md5 {})".format(
+            queryinfo.id, file_name, m.hexdigest()))
 
 
 @cli.command()
