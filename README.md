@@ -11,7 +11,7 @@ In re:dash, it's difficult to get review, track revisions, or collaborate on que
 
 # Workflow
 
-St. Mocli is currently [vaporware](https://en.wikipedia.org/wiki/Vaporware),
+St. Mocli is still in early alpha,
 so this workflow is going to change.
 
 ## Preliminaries
