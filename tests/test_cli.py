@@ -1,6 +1,7 @@
 from functools import partial
 import hashlib
 import json
+import csv
 import os
 
 try:
@@ -32,6 +33,10 @@ def response_49741_content(url, request):
     }
 
 
+with open('tests/data/example_query_results_response.json', 'rt') as infile:
+    example_result_response = infile.read()
+
+
 @all_requests
 def response_62375_content(url, request):
     return {
@@ -61,6 +66,14 @@ def fork_response(url, request):
             'query': 'SELECT * FROM foo',
             'data_source_id': 0,
         })}
+
+
+@urlmatch(path=r'.*query_results')
+def csv_response(url, request):
+    return {
+        'status_code': 200,
+        'content': example_result_response
+    }
 
 
 @all_requests
@@ -365,3 +378,45 @@ def test_fork_rejects_untracked_file(runner):
         result = runner.invoke(cli.cli, ["fork", "spam.sql", "fork.sql"])
     assert result.exit_code == 1
     assert "track" in result.output
+
+
+def test_csv_with_filename(runner):
+    query_id = '49741'
+    file_name = 'poc.csv'
+
+    with runner.isolated_filesystem():
+        with HTTMock(csv_response, response_content):
+            result = runner.invoke(cli.cli, ["write_csv", query_id, file_name])
+            assert os.path.isfile(file_name)
+            with open('poc.csv', 'r') as csvfile:
+                cr = csv.DictReader(csvfile)
+                # check that the file's header is what it should be
+                assert cr.fieldnames[0] == 'normalized_channel'
+                # check that the first row of the file is what it should be
+                assert next(cr)['normalized_channel'] == 'release'
+    assert result.exit_code == 0
+
+
+def test_csv_without_filename(runner):
+    query_id = '49741'
+
+    with runner.isolated_filesystem():
+        with HTTMock(csv_response, response_content):
+            result = runner.invoke(cli.cli, ["write_csv", query_id])
+            assert os.path.isfile('St. Mocli POC.csv')
+            with open('St. Mocli POC.csv', 'r') as csvfile:
+                cr = csv.DictReader(csvfile)
+                # check that the file's header is what it should be
+                assert cr.fieldnames[0] == 'normalized_channel'
+                # check that the first row of the file is what it should be
+                assert next(cr)['normalized_channel'] == 'release'
+    assert result.exit_code == 0
+
+
+def test_csv_bad_query_id(runner):
+    query_id = 'n0taQu3ry'
+
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli.cli, ["write_csv", query_id])
+    assert result.exit_code == 1
+    assert "server" in result.output
