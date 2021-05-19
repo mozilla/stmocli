@@ -67,6 +67,32 @@ def track(stmo, query_id, file_name):
 @cli.command()
 @click.pass_obj
 @click.argument('file_names', required=False, nargs=-1)
+def pull(stmo, file_names):
+
+    if not file_names:
+        file_names = stmo.get_tracked_filenames()
+
+    for file_name in file_names:
+        query_info = stmo.get_query_metadata(file_name)
+        if not query_info:
+            click.echo('Query "{}" not tracked'.format(file_name))
+            continue
+
+        try:
+            new_query_info = stmo.pull_query(file_name)
+        except STMO.RedashClientException as e:
+            click.echo("Failed to pull query {}: {}".format(file_name, e), err=True)
+            continue
+
+        if query_info.query_hash and query_info.query_hash == new_query_info.query_hash:
+            click.echo("Query ID {} ({}) is up to date".format(query_info.id, file_name))
+        else:
+            click.echo("Query ID {} ({}) has been updated".format(query_info.id, file_name))
+
+
+@cli.command()
+@click.pass_obj
+@click.argument('file_names', required=False, nargs=-1)
 def push(stmo, file_names):
     """Uploads a tracked query to STMO.
 

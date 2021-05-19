@@ -30,13 +30,23 @@ class Conf(object):
 
     def add_query(self, file_name, query_metadata):
         if file_name in self.contents:
-            print('Query, "{}" already tracked!'.format(file_name))
+            print('Query "{}" already tracked!'.format(file_name))
         else:
             self.contents[file_name] = query_metadata.to_dict()
             self.save()
 
+    def update_query(self, file_name, query_metadata):
+        if file_name in self.contents:
+            self.contents[file_name] = query_metadata.to_dict()
+            self.save()
+        else:
+            print('Query "{}" not tracked!'.format(file_name))
+
     def get_query(self, file_name):
         return QueryInfo.from_dict(self.contents[file_name])
+
+    def has_query(self, file_name):
+        return file_name in self.contents
 
     def get_filenames(self):
         return self.contents.keys()
@@ -50,6 +60,7 @@ class QueryInfo(object):
     description = attr.ib()
     schedule = attr.ib()
     options = attr.ib()
+    query_hash = attr.ib()
 
     @id.validator
     def id_is_not_none(instance, attribute, value):

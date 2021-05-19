@@ -39,6 +39,9 @@ class STMO(object):
         )
         return results
 
+    def get_query_metadata(self, file_name):
+        return self.conf.get_query(file_name) if self.conf.has_query(file_name) else None
+
     def track_query(self, query_id, file_name):
         """Saves a query to disk and adds it to the conf file.
 
@@ -57,6 +60,26 @@ class STMO(object):
         query_info = QueryInfo.from_dict(query)
         self.conf.add_query(query_file_name, query_info)
         return query_info
+
+    def pull_query(self, file_name):
+        """Pulls remote query data to disk
+
+        Args:
+            file_name (str): Name of the file_name to update
+
+        Returns:
+            query_info (QueryInfo): Metadata about the tracked query
+        """
+        query_info = self.conf.get_query(file_name)
+        query = self.get_query(query_info.id)
+
+        with open(file_name, "w") as outfile:
+            outfile.write(query["query"])
+
+        new_query_info = QueryInfo.from_dict(query)
+        self.conf.update_query(file_name, new_query_info)
+
+        return new_query_info
 
     def push_query(self, file_name):
         """Replaces the SQL on Redash with the local version of a tracked query.

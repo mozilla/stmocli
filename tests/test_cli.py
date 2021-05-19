@@ -164,6 +164,33 @@ def update_tracked_query(file_name, original_query):
     return updated_query
 
 
+def test_pull(runner):
+    with runner.isolated_filesystem():
+        query_49741_before = setup_tracked_query(runner, '49741', '49741.sql',
+                                                 response_49741_content)
+        setup_tracked_query(runner, '62375', '62375.sql', response_62375_content)
+
+        with open('49741.sql', 'w') as query_49741_contents:
+            query_49741_contents.write("SELECT nonsense FROM testing")
+        with open('62375.sql', 'w') as query_62375_contents:
+            query_62375_contents.write("SELECT gibberish FROM testing")
+
+        with HTTMock(response_49741_content):
+            result = runner.invoke(cli.cli, [
+                '--redash_api_key',
+                'TOTALLY_FAKE_KEY',
+                "pull",
+                "49741.sql",
+            ])
+            assert result.exit_code == 0
+
+        with open('49741.sql', 'r') as query_49741_contents:
+            assert query_49741_contents.read() == query_49741_before
+
+        with open('62375.sql', 'r') as query_62375_contents:
+            assert query_62375_contents.read() == "SELECT gibberish FROM testing"
+
+
 def test_push_tracked(runner):
     query_id = '49741'
     file_name = 'poc.sql'

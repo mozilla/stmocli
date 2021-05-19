@@ -81,16 +81,16 @@ Assuming this is the first query being tracked, `.stmocli.conf` would look like 
 
 ## `pull` a linked query
 
-**Not Yet Implemented**
+**Implemented!**
 
-`stmocli pull [<id>]`
+`stmocli pull [<file_name>...]`
 
-Pulls the current SQL statements and metadata from re:dash for the given query.
-If no query id is specified, pull data for all queries.
+Pulls the current SQL statements and metadata from re:dash for the given query files.
+If no file name is specified, pull data for all queries.
 This will **overwrite local data**.
 Be sure to use version control.
 
-`<id>` must be a key in the dictionary stored in `.stmocli.conf`
+`<file_name>` must be a key in the dictionary stored in `.stmocli.conf`
 
 ## `push` a query
 
